@@ -19,8 +19,6 @@ var getDirectories = function (receiveDirectories) {
             });
         });
     });
-
-    receiveDirectories(dirs);
 }
 
 getDirectories(function (dirs) {
