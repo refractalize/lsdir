@@ -22,11 +22,11 @@ describe 'lsdir' do
     end
 
     def file(filename)
-        FileUtils.touch('file')
+        FileUtils.touch(filename)
     end
 
     def dir(dir)
-        FileUtils.mkdir_p('dir')
+        FileUtils.mkdir_p(dir)
     end
 
     def lsdir
@@ -34,17 +34,21 @@ describe 'lsdir' do
     end
 
     it 'only lists directories' do
-        dir 'dir'
-        file 'file'
+        dir 'dir1'
+        dir 'dir2'
+        file 'file1'
+        file 'file2'
 
         lsdir.should == <<eof
 dirs:
-    dir
+    dir1
+    dir2
 eof
     end
 
     it 'still prints header if no directories found' do
-        file 'file'
+        file 'file1'
+        file 'file2'
 
         lsdir.should == <<eof
 dirs:
