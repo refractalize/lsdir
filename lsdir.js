@@ -18,11 +18,16 @@ var getDirectories = function (receiveDirectories) {
                 }
             });
         });
+
+        if (n==0) {
+            receiveDirectories(dirs);
+        }
     });
 }
 
 getDirectories(function (dirs) {
+    console.log('dirs:')
     _(dirs).each(function (dir) {
-        console.log(dir);
+        console.log('    ' + dir);
     });
 });
