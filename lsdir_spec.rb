@@ -1,6 +1,37 @@
 require 'fileutils'
 
 describe 'lsdir' do
+    it 'only lists directories' do
+        dir 'dir1'
+        dir 'dir2'
+        file 'file1'
+        file 'file2'
+
+        lsdir.should == <<eof
+dirs:
+    dir1
+    dir2
+count: 2
+eof
+    end
+
+    it 'still prints header if no directories found' do
+        file 'file1'
+        file 'file2'
+
+        lsdir.should == <<eof
+dirs:
+count: 0
+eof
+    end
+
+    it 'still prints header if no files or directories found' do
+        lsdir.should == <<eof
+dirs:
+count: 0
+eof
+    end
+
     before :all do
         @rootdir = Dir.pwd
         @testdir = 'testdir'
@@ -31,33 +62,5 @@ describe 'lsdir' do
 
     def lsdir
         %x{node ../lsdir.js}
-    end
-
-    it 'only lists directories' do
-        dir 'dir1'
-        dir 'dir2'
-        file 'file1'
-        file 'file2'
-
-        lsdir.should == <<eof
-dirs:
-    dir1
-    dir2
-eof
-    end
-
-    it 'still prints header if no directories found' do
-        file 'file1'
-        file 'file2'
-
-        lsdir.should == <<eof
-dirs:
-eof
-    end
-
-    it 'still prints header if no files or directories found' do
-        lsdir.should == <<eof
-dirs:
-eof
     end
 end

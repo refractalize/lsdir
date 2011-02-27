@@ -55,4 +55,5 @@ getDirectories(function (dirs) {
     _(dirs).each(function (dir) {
         console.log('    ' + dir);
     });
+    console.log('count: ' + dirs.length);
 });
