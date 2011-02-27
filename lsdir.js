@@ -1,41 +1,63 @@
 var fs = require('fs');
 var _ = require('underscore');
 
-var select = function (items, eachItem, finallyDo) {
-    var n = 0;
-    var collectedItems = [];
+var zo = function (items, pipeline) {
+    pipeline = (pipeline || []);
 
-    var callFinallyDoIfFinished = function () {
-        if (n == 0) {
-            finallyDo(collectedItems);
+    var runPipeline = function (items, funcs) {
+        first = _(funcs).head();
+        if (first) {
+            first(items, function (it) { runPipeline(it, _(funcs).tail()); });
         }
     }
 
-    var finishedItem = function () {
-        n--;
-        callFinallyDoIfFinished();
+    return {
+        tail: function () {
+            pipeline.push(function (items, next) {
+                console.log('tail');
+                console.log(items);
+                next(_(items).tail());
+            });
+            return zo(items, pipeline);
+        },
+        results: function (f) {
+            pipeline.push(function (items, next) {
+                f(items);
+            });
+            runPipeline(items, pipeline);
+        },
+        select: function (selector) {
+            pipeline.push(function (items, next) {
+                var n = items.length;
+                var selectedItems = [];
+
+                if (n > 0) {
+                    _(items).each(function (item) {
+                        selector(item, function (selected) {
+                            if (selected) selectedItems.push(item);
+                            n--;
+                            if (n == 0) {
+                                next(selectedItems);
+                            }
+                        });
+                    });
+                } else {
+                    next(selectedItems);
+                }
+            });
+
+            return zo(items, pipeline);
+        }
     };
-
-    _(items).each(function (item) {
-        n++;
-        eachItem(item, function (collected) {
-            if (collected) {
-                collectedItems.push(item);
-            }
-            finishedItem();
-        });
-    });
-
-    callFinallyDoIfFinished();
 };
 
 var getDirectories = function (receiveDirectories) {
     fs.readdir('.', function (err, files) {
-        select(files, function (file, selectIf) {
+        zo(files).select(function (file, selectIf) {
             fs.stat(file, function (err, fileStat) {
                 selectIf(fileStat.isDirectory());
             });
-        }, function (dirs) {
+        }).results(function (dirs) {
             receiveDirectories(dirs);
         });
     });
