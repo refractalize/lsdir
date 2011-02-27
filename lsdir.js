@@ -12,14 +12,6 @@ var zo = function (items, pipeline) {
     }
 
     return {
-        tail: function () {
-            pipeline.push(function (items, next) {
-                console.log('tail');
-                console.log(items);
-                next(_(items).tail());
-            });
-            return zo(items, pipeline);
-        },
         results: function (f) {
             pipeline.push(function (items, next) {
                 f(items);
