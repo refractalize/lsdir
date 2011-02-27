@@ -1,52 +1,43 @@
 var fs = require('fs');
 var _ = require('underscore');
 
-var callbacker = function () {
-    var _this = _(arguments).head();
-    var func_args = _(arguments).tail();
-    var func = _(func_args).head();
-    var args = _(func_args).tail();
+var select = function (items, eachItem, finallyDo) {
+    var n = 0;
+    var collectedItems = [];
 
-    var result, error;
+    var callFinallyDoIfFinished = function () {
+        if (n == 0) {
+            finallyDo(collectedItems);
+        }
+    }
 
-    args.push(function (err, res) {
-        if (result) result(res);
-        if (error) error(err);
+    var finishedItem = function () {
+        n--;
+        callFinallyDoIfFinished();
+    };
+
+    _(items).each(function (item) {
+        n++;
+        eachItem(item, function (collected) {
+            if (collected) {
+                collectedItems.push(item);
+            }
+            finishedItem();
+        });
     });
 
-    func.apply(_this, args);
-
-    return {
-        result: function (f) {
-            result = f;
-        },
-        error: function (f) {
-            error = f;
-        }
-    };
-}
+    callFinallyDoIfFinished();
+};
 
 var getDirectories = function (receiveDirectories) {
-    var dirs = [];
-    var n = 0;
-
-    callbacker(fs, fs.readdir, '.').result(function (files) {
-        _(files).each(function (file) {
-            n++;
+    fs.readdir('.', function (err, files) {
+        select(files, function (file, selectIf) {
             fs.stat(file, function (err, fileStat) {
-                if (fileStat.isDirectory()) {
-                    dirs.push(file);
-                }
-                n--;
-                if (n==0) {
-                    receiveDirectories(dirs);
-                }
+                selectIf(fileStat.isDirectory());
             });
-        });
-
-        if (n==0) {
+        }, function (dirs) {
             receiveDirectories(dirs);
-        }
+        });
     });
 }
 
