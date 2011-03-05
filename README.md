@@ -15,3 +15,7 @@ The challenge is, then, to rewrite or refactor the lsdir.js code into something 
 ## The Tests
 
 Tests are written in ruby/rspec, so a quick `rspec lsdir_spec.rb` will show you if you're still on the right track. There's also a specs.watchr file, so you can run `watchr specs.watchr` if you want save-by-save test feedback.
+
+# The Result
+
+My solution to this is `zo`, an async friendly list processing library containing all the usual suspects `map`, `select` and `reduce`. See the [zo branch](https://github.com/refractalize/lsdir/tree/zo), or see the [zo repository](https://github.com/refractalize/zo).
